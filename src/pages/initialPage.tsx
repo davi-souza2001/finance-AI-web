@@ -1,5 +1,6 @@
 import { columns, type Payment } from "@/components/payments/columns";
 import { DataTable } from "@/components/payments/data-table";
+import { SectionCards } from "@/components/section-card";
 
 export function InitialPage() {
   const data: Payment[] = [
@@ -21,6 +22,7 @@ export function InitialPage() {
     <div className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-6xl">
         <p>teste</p>
+        <SectionCards />
         <DataTable columns={columns} data={data} />
       </div>
     </div>
