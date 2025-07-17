@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -11,15 +11,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-export function LoginPage() {
+export function RegisterPage() {
   return (
     <div className="min-h-screen px-4">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-4">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle>Login to your account</CardTitle>
+            <CardTitle>Create an account</CardTitle>
             <CardDescription>
-              Enter your email below to login to your account
+              Enter your email below to create an account
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -36,6 +36,12 @@ export function LoginPage() {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
+                    <Label htmlFor="name">Name</Label>
+                  </div>
+                  <Input id="name" required type="text" />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
                   </div>
                   <Input id="password" required type="password" />
@@ -45,11 +51,11 @@ export function LoginPage() {
           </CardContent>
           <CardFooter className="flex-col gap-2">
             <Button className="w-full" type="submit">
-              Login
+              Create an account
             </Button>
-            <Link className="w-full" to="/register">
+            <Link className="w-full" to="/login">
               <Button className="w-full" variant="outline">
-                Create an account
+                Sign in
               </Button>
             </Link>
           </CardFooter>
