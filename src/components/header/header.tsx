@@ -20,13 +20,13 @@ export const Header = () => {
             <ArrowDownIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-28">
+        <PopoverContent className="w-32">
           <Button
             className="cursor-pointer hover:bg-destructive/50"
             variant="destructive"
           >
             <LogOutIcon />
-            Sair
+            Logout
           </Button>
         </PopoverContent>
       </Popover>
