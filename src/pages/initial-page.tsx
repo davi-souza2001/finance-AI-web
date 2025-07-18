@@ -1,28 +1,12 @@
 import { Header } from '@/components/header'
-import { columns, type Payment } from '@/components/payments/columns'
+import { columns } from '@/components/payments/columns'
 import { DataTable } from '@/components/payments/data-table'
 import { SectionCard } from '@/components/section-card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useGetItemsByUser } from '@/http/use-get-items'
 
 export function InitialPage() {
-  const data: Payment[] = [
-    {
-      id: '728ed52f',
-      amount: 100,
-      status: 'pending',
-      description: 'm@example.com',
-      name: 'John Doe',
-      category: 'Food',
-    },
-    {
-      id: '489e1d42',
-      amount: 125,
-      status: 'processing',
-      description: 'example@gmail.com',
-      name: 'Jane Doe',
-      category: 'Food',
-    },
-  ]
+  const { data: items } = useGetItemsByUser("a42dd495-cc6e-4b00-bbed-03a1a1d1fb54")
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -50,7 +34,7 @@ export function InitialPage() {
                 <SectionCard />
                 <SectionCard />
               </div>
-              <DataTable columns={columns} data={data} />
+              <DataTable columns={columns} data={items ?? []} />
             </div>
           </TabsContent>
           <TabsContent value="investment">

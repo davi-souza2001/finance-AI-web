@@ -12,23 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import type { CreateItemResponse } from '@/http/types/itemType'
 
-export type Payment = {
-  id: string
-  amount: number
-  status: 'pending' | 'processing' | 'success' | 'failed'
-  description: string
-  category: string
-  name: string
-}
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<CreateItemResponse>[] = [
   {
-    accessorKey: 'status',
-    header: 'Status',
-  },
-  {
-    accessorKey: 'category',
+    accessorKey: 'categoryId',
     header: ({ column }) => {
       return (
         <div className="flex justify-center">
@@ -43,7 +31,7 @@ export const columns: ColumnDef<Payment>[] = [
       )
     },
     cell: ({ row }) => (
-      <div className="text-center">{row.getValue('category')}</div>
+      <div className="text-center">{row.getValue('categoryId')}</div>
     ),
   },
   {
@@ -55,13 +43,13 @@ export const columns: ColumnDef<Payment>[] = [
     header: 'Description',
   },
   {
-    accessorKey: 'amount',
-    header: () => <div className="text-right">Amount</div>,
+    accessorKey: 'price',
+    header: () => <div className="text-right">Price</div>,
     cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('amount'))
-      const formatted = new Intl.NumberFormat('en-US', {
+      const amount = Number.parseFloat(row.getValue('price'))
+      const formatted = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'BRL',
       }).format(amount)
 
       return <div className="text-right font-medium">{formatted}</div>
@@ -71,7 +59,7 @@ export const columns: ColumnDef<Payment>[] = [
     id: 'actions',
     header: () => <div className="text-right" />,
     cell: ({ row }) => {
-      const payment = row.original
+      const item = row.original
 
       return (
         <div className="text-right">
@@ -85,13 +73,12 @@ export const columns: ColumnDef<Payment>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
+                onClick={() => navigator.clipboard.writeText(item?.id ?? '')}
               >
                 Copy payment ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
+              <DropdownMenuItem variant='destructive'>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

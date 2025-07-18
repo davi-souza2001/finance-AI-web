@@ -56,10 +56,10 @@ export function DataTable<TData, TValue>({
         <Input
           className="max-w-sm"
           onChange={(event) =>
-            table.getColumn('email')?.setFilterValue(event.target.value)
+            table.getColumn('name')?.setFilterValue(event.target.value)
           }
-          placeholder="Filter emails..."
-          value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+          placeholder="Filter name..."
+          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
         />
       </div>
       <div className="rounded-md border">
