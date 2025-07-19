@@ -6,7 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetItemsByUser } from '@/http/use-get-items'
 
 export function InitialPage() {
-  const { data: items } = useGetItemsByUser("a42dd495-cc6e-4b00-bbed-03a1a1d1fb54")
+  const { data: items } = useGetItemsByUser(
+    'a42dd495-cc6e-4b00-bbed-03a1a1d1fb54'
+  )
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -15,13 +17,13 @@ export function InitialPage() {
         <Tabs className="items-start" defaultValue="finances">
           <TabsList className="h-auto w-full justify-start rounded-none border-b bg-transparent p-0">
             <TabsTrigger
-              className='data-[state=active]:!bg-transparent data-[state=active]:!border-transparent relative w-52 flex-none rounded-none py-2 outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 data-[state=active]:shadow-none data-[state=active]:after:bg-primary'
+              className='data-[state=active]:!bg-transparent data-[state=active]:!border-transparent relative w-52 flex-none cursor-pointer rounded-none py-2 outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 data-[state=active]:shadow-none data-[state=active]:after:bg-primary'
               value="finances"
             >
               Finances
             </TabsTrigger>
             <TabsTrigger
-              className='data-[state=active]:!bg-transparent data-[state=active]:!border-transparent relative w-52 flex-none rounded-none py-2 outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 data-[state=active]:shadow-none data-[state=active]:after:bg-primary'
+              className='data-[state=active]:!bg-transparent data-[state=active]:!border-transparent relative w-52 flex-none cursor-pointer rounded-none py-2 outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 data-[state=active]:shadow-none data-[state=active]:after:bg-primary'
               value="investment"
             >
               Investment
