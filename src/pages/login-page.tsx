@@ -112,7 +112,7 @@ export function LoginPage() {
               </CardContent>
               <CardFooter className="flex-col gap-2">
                 <Button
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={createLoginForm.formState.isSubmitting}
                   type="submit"
                 >
@@ -123,7 +123,7 @@ export function LoginPage() {
                   )}
                 </Button>
                 <Link className="w-full" to="/register">
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full cursor-pointer" variant="outline">
                     Create an account
                   </Button>
                 </Link>
