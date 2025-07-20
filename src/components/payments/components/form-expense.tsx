@@ -46,7 +46,7 @@ export function FormExpense() {
       name,
       description,
       categoryId: categoryId || '96d21a67-06a6-4df3-b237-3adf972b2bed',
-      userId: 'a42dd495-cc6e-4b00-bbed-03a1a1d1fb54',
+      userId: '56364494-6640-469d-ba22-70d6d5c40687',
       price,
     })
 

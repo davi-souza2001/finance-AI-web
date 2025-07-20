@@ -7,7 +7,7 @@ import { useGetItemsByUser } from '@/http/use-get-items'
 
 export function InitialPage() {
   const { data: items } = useGetItemsByUser(
-    'a42dd495-cc6e-4b00-bbed-03a1a1d1fb54'
+    '56364494-6640-469d-ba22-70d6d5c40687'
   )
 
   return (
