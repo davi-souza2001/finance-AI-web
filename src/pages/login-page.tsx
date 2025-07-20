@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import Cookies from 'js-cookie'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +37,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginPage() {
   const { mutateAsync: login } = useLogin()
+  const navigate = useNavigate()
 
   const createLoginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -46,12 +48,20 @@ export function LoginPage() {
   })
 
   async function handleLoginItem({ email, password }: LoginFormData) {
-    await login({
+    const { token } = await login({
       email,
       password,
     })
 
-    createLoginForm.reset()
+    if (token) {
+      console.log('token :>> ', token);
+      Cookies.set('auth-finance-ai-web', token, {
+        expires: 7, // 7 dias
+        path: '/',
+      })
+      createLoginForm.reset()
+      // navigate('/')
+    }
   }
 
   return (
