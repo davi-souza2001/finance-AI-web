@@ -56,11 +56,11 @@ export function LoginPage() {
     if (token) {
       console.log('token :>> ', token);
       Cookies.set('auth-finance-ai-web', token, {
-        expires: 7, // 7 dias
+        expires: 7, // 7 days
         path: '/',
       })
       createLoginForm.reset()
-      // navigate('/')
+      navigate('/')
     }
   }
 

@@ -4,11 +4,15 @@ import { DataTable } from '@/components/payments/data-table'
 import { SectionCard } from '@/components/section-card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetItemsByUser } from '@/http/use-get-items'
+import { useUserStore } from '@/store/useUserStore'
 
 export function InitialPage() {
+  const { user } = useUserStore()
   const { data: items } = useGetItemsByUser(
     '56364494-6640-469d-ba22-70d6d5c40687'
   )
+
+  console.log('user :>> ', user)
 
   return (
     <div className="min-h-screen px-4 py-8">
