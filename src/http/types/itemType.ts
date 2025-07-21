@@ -14,4 +14,5 @@ export type CreateItemResponse = {
   price: number
   id?: string
   createdAt?: string
+  category?: string
 }

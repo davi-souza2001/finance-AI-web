@@ -3,16 +3,22 @@ import { columns } from '@/components/payments/columns'
 import { DataTable } from '@/components/payments/data-table'
 import { SectionCard } from '@/components/section-card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useGetCategories } from '@/http/use-get-categories'
 import { useGetItemsByUser } from '@/http/use-get-items'
 import { useUserStore } from '@/store/useUserStore'
 
 export function InitialPage() {
   const { user } = useUserStore()
-  const { data: items } = useGetItemsByUser(
-    '56364494-6640-469d-ba22-70d6d5c40687'
-  )
+  const { data: categories } = useGetCategories()
+  const { data: items } = useGetItemsByUser(user?.id ?? '')
 
-  console.log('user :>> ', user)
+  const itemsCategoriesTransformed = items?.map((item) => {
+    const category = categories?.find((cat) => cat.id === item.categoryId)
+    return {
+      ...item,
+      category: category?.name,
+    }
+  })
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -40,7 +46,7 @@ export function InitialPage() {
                 <SectionCard />
                 <SectionCard />
               </div>
-              <DataTable columns={columns} data={items ?? []} />
+              <DataTable columns={columns} data={itemsCategoriesTransformed ?? []} />
             </div>
           </TabsContent>
           <TabsContent value="investment">

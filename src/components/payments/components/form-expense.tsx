@@ -12,7 +12,17 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useCreateItem } from '@/http/use-create-item'
+import { useGetCategories } from '@/http/use-get-categories'
+import { useUserStore } from '@/store/useUserStore'
 
 const createItemSchema = z.object({
   name: z.string().min(3, { message: 'Inclua no mínimo 3 caracteres' }),
@@ -24,7 +34,10 @@ const createItemSchema = z.object({
 type CreateItemFormData = z.infer<typeof createItemSchema>
 
 export function FormExpense() {
+  const { user } = useUserStore()
   const { mutateAsync: createItem } = useCreateItem()
+  const { data: categories, isLoading: isLoadingCategories } =
+    useGetCategories()
 
   const createItemForm = useForm<CreateItemFormData>({
     resolver: zodResolver(createItemSchema),
@@ -45,8 +58,8 @@ export function FormExpense() {
     await createItem({
       name,
       description,
-      categoryId: categoryId || '96d21a67-06a6-4df3-b237-3adf972b2bed',
-      userId: '56364494-6640-469d-ba22-70d6d5c40687',
+      categoryId,
+      userId: user?.id ?? '',
       price,
     })
 
@@ -99,16 +112,28 @@ export function FormExpense() {
           name="categoryId"
           render={({ field }) => {
             return (
-              <FormItem>
+              <Select onValueChange={field.onChange} {...field}>
                 <FormLabel>Categoria</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Digite a categoria do item..."
-                  />
-                </FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={'Selecione a categoria'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoadingCategories ? (
+                    <div className='flex flex-col gap-2'>
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ) : (
+                    categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
                 <FormMessage />
-              </FormItem>
+              </Select>
             )
           }}
         />
@@ -138,9 +163,7 @@ export function FormExpense() {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button type="submit">Criar item</Button>
-          </DialogClose>
+          <Button type="submit">Criar item</Button>
         </DialogFooter>
       </form>
     </Form>

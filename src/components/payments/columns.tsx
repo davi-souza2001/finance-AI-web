@@ -16,7 +16,7 @@ import type { CreateItemResponse } from '@/http/types/itemType'
 
 export const columns: ColumnDef<CreateItemResponse>[] = [
   {
-    accessorKey: 'categoryId',
+    accessorKey: 'category',
     header: ({ column }) => {
       return (
         <div className="flex justify-center">
@@ -31,7 +31,7 @@ export const columns: ColumnDef<CreateItemResponse>[] = [
       )
     },
     cell: ({ row }) => (
-      <div className="text-center">{row.getValue('categoryId')}</div>
+      <div className="text-center">{row.getValue('category')}</div>
     ),
   },
   {
