@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCreateItem } from '@/http/use-create-item'
+import { useGenerateItem } from '@/http/use-generate-item'
 import { useGetCategories } from '@/http/use-get-categories'
 import { useUserStore } from '@/store/useUserStore'
 
@@ -29,6 +30,7 @@ const createItemSchema = z.object({
   description: z.string(),
   categoryId: z.string().min(1, { message: 'Selecione uma categoria' }),
   price: z.coerce.number().min(1, { message: 'Inclua um valor' }),
+  image: z.string().optional(),
 })
 
 type CreateItemFormData = z.infer<typeof createItemSchema>
@@ -38,6 +40,7 @@ export function FormExpense() {
   const { mutateAsync: createItem } = useCreateItem()
   const { data: categories, isLoading: isLoadingCategories } =
     useGetCategories()
+  const { mutateAsync: generateItem } = useGenerateItem()
 
   const createItemForm = useForm<CreateItemFormData>({
     resolver: zodResolver(createItemSchema),
@@ -46,6 +49,7 @@ export function FormExpense() {
       description: '',
       categoryId: '',
       price: 0,
+      image: '',
     },
   })
 
@@ -64,6 +68,30 @@ export function FormExpense() {
     })
 
     createItemForm.reset()
+  }
+
+  const generateItemFactory = (item: string) => {
+    console.log('item :>> ', item)
+  }
+
+  const handleImageChange = (file: File) => {
+    const reader = new FileReader()
+    
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      const base64 = dataUrl.split(',')[1] 
+      console.log('Base64:', base64)
+      
+      generateItem({ image: base64 })
+        .then((result) => {
+          generateItemFactory(result?.itemId)
+        })
+        .catch((error) => {
+          console.error('Erro:', error)
+        })
+    }
+    
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -119,7 +147,7 @@ export function FormExpense() {
                 </SelectTrigger>
                 <SelectContent>
                   {isLoadingCategories ? (
-                    <div className='flex flex-col gap-2'>
+                    <div className="flex flex-col gap-2">
                       <Skeleton className="h-10 w-full" />
                       <Skeleton className="h-10 w-full" />
                       <Skeleton className="h-10 w-full" />
@@ -151,6 +179,32 @@ export function FormExpense() {
                     className="remove-number-arrows"
                     placeholder="Digite o preço do item..."
                     type="number"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )
+          }}
+        />
+
+        <FormField
+          control={createItemForm.control}
+          name="image"
+          render={() => {
+            return (
+              <FormItem>
+                <FormLabel>Imagem</FormLabel>
+                <FormControl>
+                  <Input
+                    accept="image/*"
+                    id="image"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        handleImageChange(file)
+                      }
+                    }}
+                    type="file"
                   />
                 </FormControl>
                 <FormMessage />

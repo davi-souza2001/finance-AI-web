@@ -16,3 +16,11 @@ export type CreateItemResponse = {
   createdAt?: string
   category?: string
 }
+
+export type GenerateItemResponse = {
+  itemId: string
+}
+
+export type GenerateItemRequest = {
+  image: string
+}
