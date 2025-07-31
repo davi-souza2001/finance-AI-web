@@ -1,4 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -41,6 +43,7 @@ export function FormExpense() {
   const { data: categories, isLoading: isLoadingCategories } =
     useGetCategories()
   const { mutateAsync: generateItem } = useGenerateItem()
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
 
   const createItemForm = useForm<CreateItemFormData>({
     resolver: zodResolver(createItemSchema),
@@ -76,12 +79,11 @@ export function FormExpense() {
 
   const handleImageChange = (file: File) => {
     const reader = new FileReader()
-    
+
     reader.onload = () => {
       const dataUrl = reader.result as string
-      const base64 = dataUrl.split(',')[1] 
-      console.log('Base64:', base64)
-      
+      const base64 = dataUrl.split(',')[1]
+
       generateItem({ image: base64 })
         .then((result) => {
           generateItemFactory(result?.itemId)
@@ -89,8 +91,11 @@ export function FormExpense() {
         .catch((error) => {
           console.error('Erro:', error)
         })
+        .finally(() => {
+          setIsGeneratingImage(false)
+        })
     }
-    
+
     reader.readAsDataURL(file)
   }
 
@@ -187,31 +192,41 @@ export function FormExpense() {
           }}
         />
 
-        <FormField
-          control={createItemForm.control}
-          name="image"
-          render={() => {
-            return (
-              <FormItem>
-                <FormLabel>Imagem</FormLabel>
-                <FormControl>
-                  <Input
-                    accept="image/*"
-                    id="image"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        handleImageChange(file)
-                      }
-                    }}
-                    type="file"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )
-          }}
-        />
+        <div className="flex w-full items-center justify-between gap-2">
+          <FormField
+            control={createItemForm.control}
+            name="image"
+            render={() => {
+              return (
+                <FormItem className="w-full">
+                  <FormLabel>Imagem</FormLabel>
+                  <FormControl>
+                    <Input
+                      accept="image/*"
+                      id="image"
+                      onChange={(e) => {
+                        setIsGeneratingImage(true)
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          handleImageChange(file)
+                          return
+                        }
+                        setIsGeneratingImage(false)
+                      }}
+                      type="file"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
+          />
+          {isGeneratingImage && (
+            <div className='mt-5 flex items-center justify-center'>
+              <Loader2 className="animate-spin" />
+            </div>
+          )}
+        </div>
 
         <DialogFooter>
           <DialogClose asChild>
