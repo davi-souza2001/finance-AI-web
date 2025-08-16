@@ -62,18 +62,9 @@ export function FormExpense() {
   const { mutateAsync: generateItem } = useGenerateItem()
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   const [isGeneratedItemDialogOpen, setIsGeneratedItemDialogOpen] =
-    useState(true)
+    useState(false)
   const [generatedItems, setGeneratedItems] = useState<GeneratedItemResponse[]>(
-    [
-      {
-        category: 'Despesa',
-        value: 'R$ 51,22',
-      },
-      {
-        category: 'Teste',
-        value: 'R$ 0,00',
-      },
-    ]
+    []
   )
   const [isSendingGeneratedItems, setIsSendingGeneratedItems] = useState(false)
   const [apiResponse, setApiResponse] = useState<string>('')
@@ -149,11 +140,14 @@ export function FormExpense() {
       setIsSendingGeneratedItems(true)
       Promise.all(
         generatedItems.map(async (item) => {
-          //search for categoryId
+          const category = categories?.find(
+            (cat) => cat.name === item.category
+          )
+
           await createItem({
             name: item?.category,
             description: item?.category,
-            categoryId: item?.category,
+            categoryId: category?.id ?? '',
             userId: user?.id ?? '',
             price: Number(item?.value.replace(/[^\d,]/g, '').replace(',', '.')),
           })
