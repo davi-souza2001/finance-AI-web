@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import { jwtDecode } from 'jwt-decode'
+import { Loader2 } from 'lucide-react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useGetUserById } from '@/http/user-get-user-by-id'
 import { useUserStore } from '@/store/useUserStore'
@@ -17,7 +18,9 @@ function AuthenticatedRoute() {
     useUserStore.setState({ user: data })
   }
 
-  return <>{isLoading ? <div>Loading...</div> : <Outlet />}</>
+  return <>{isLoading ? <div className="flex h-screen w-screen items-center justify-center">
+    <Loader2 className="animate-spin" size={40} />
+  </div> : <Outlet />}</>
 }
 
 export function PrivateRoute() {
