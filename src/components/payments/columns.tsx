@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { CreateItemResponse } from '@/http/types/itemType'
+import { useDeleteItem } from '@/http/use-delete-item'
+import { useUserStore } from '@/store/useUserStore'
 
 export const columns: ColumnDef<CreateItemResponse>[] = [
   {
@@ -59,7 +61,14 @@ export const columns: ColumnDef<CreateItemResponse>[] = [
     id: 'actions',
     header: () => <div className="text-right" />,
     cell: ({ row }) => {
-      const item = row.original
+      const { user } = useUserStore()
+      const { mutate: deleteItem } = useDeleteItem()
+      const handleDeleteItem = () => {
+        deleteItem({
+          userId: user?.id ?? '',
+          itemId: row?.original?.id ?? '',
+        })
+      }
 
       return (
         <div className="text-right">
@@ -72,13 +81,13 @@ export const columns: ColumnDef<CreateItemResponse>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(item?.id ?? '')}
-              >
-                Copy payment ID
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant='destructive'>Delete</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleDeleteItem}
+                variant="destructive"
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

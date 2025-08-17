@@ -24,3 +24,8 @@ export type GenerateItemResponse = {
 export type GenerateItemRequest = {
   image: string
 }
+
+export type DeleteItemRequest = {
+  userId: string
+  itemId: string
+}
