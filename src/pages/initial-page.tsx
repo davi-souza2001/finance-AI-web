@@ -1,7 +1,8 @@
 import { Header } from '@/components/header'
 import { columns } from '@/components/payments/columns'
 import { DataTable } from '@/components/payments/data-table'
-import { SectionCard } from '@/components/section-card'
+import { RecommendationCard } from '@/components/sections-cards/recommendation-card'
+import { TotalExpenseCard } from '@/components/sections-cards/total-expense-card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetCategories } from '@/http/use-get-categories'
 import { useGetItemsByUser } from '@/http/use-get-items'
@@ -40,11 +41,10 @@ export function InitialPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="finances">
-            <div className="mx-auto flex max-w-6xl flex-col items-start justify-start gap-4">
+            <div className="mx-auto flex w-6xl flex-col items-start justify-start gap-4">
               <div className="flex w-full items-center justify-start gap-4">
-                <SectionCard />
-                <SectionCard />
-                <SectionCard />
+                <TotalExpenseCard items={items ?? []} />
+                <RecommendationCard items={items ?? []} user={user} />
               </div>
               <DataTable columns={columns} data={itemsCategoriesTransformed ?? []} />
             </div>
