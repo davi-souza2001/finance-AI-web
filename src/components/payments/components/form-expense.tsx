@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
@@ -29,183 +28,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useCreateItem } from '@/http/use-create-item'
 import { useGenerateItem } from '@/http/use-generate-item'
-import { useGetCategories } from '@/http/use-get-categories'
-import { useUserStore } from '@/store/useUserStore'
-
-const JSON_START_REGEX = /^```json\s*/
-const CODE_START_REGEX = /^```\s*/
-const CODE_END_REGEX = /\s*```$/
+import { TransactionCategories, type ItemsPropsResponse } from '@/http/types/itemType'
 
 const createItemSchema = z.object({
-  name: z.string().min(3, { message: 'Inclua no mínimo 3 caracteres' }),
+  title: z.string().min(3, { message: 'Inclua no mínimo 3 caracteres' }),
   description: z.string(),
-  categoryId: z.string().min(1, { message: 'Selecione uma categoria' }),
-  price: z.coerce.number().min(1, { message: 'Inclua um valor' }),
+  category: z.nativeEnum(TransactionCategories),
+  value: z.coerce.number().min(1, { message: 'Inclua um valor' }),
   image: z.string().optional(),
 })
 
 type CreateItemFormData = z.infer<typeof createItemSchema>
 
-type GeneratedItemResponse = {
-  category: string
-  value: string
-}
-
 export function FormExpense() {
-  const { user } = useUserStore()
   const { mutateAsync: createItem } = useCreateItem()
-  const { data: categories, isLoading: isLoadingCategories } =
-    useGetCategories()
+  const categories = Object.values(TransactionCategories)
   const { mutateAsync: generateItem } = useGenerateItem()
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
-  const [isGeneratedItemDialogOpen, setIsGeneratedItemDialogOpen] =
-    useState(false)
-  const [generatedItems, setGeneratedItems] = useState<GeneratedItemResponse[]>(
+  const [generatedItems, setGeneratedItems] = useState<ItemsPropsResponse[]>(
     []
   )
-  const [isSendingGeneratedItems, setIsSendingGeneratedItems] = useState(false)
   const [apiResponse, setApiResponse] = useState<string>('')
+  const totalSpent = generatedItems?.reduce((acc, item) => acc + item.props.value, 0) ?? 0
 
   const createItemForm = useForm<CreateItemFormData>({
     resolver: zodResolver(createItemSchema),
     defaultValues: {
-      name: '',
+      title: '',
       description: '',
-      categoryId: '',
-      price: 0,
+      category: TransactionCategories.OTHER,
+      value: 0,
       image: '',
     },
   })
 
   async function handleCreateItem({
-    name,
+    title,
     description,
-    categoryId,
-    price,
+    category,
+    value,
   }: CreateItemFormData) {
     await createItem({
-      name,
+      title,
       description,
-      categoryId,
-      userId: user?.id ?? '',
-      price,
+      category,
+      value,
     })
 
     createItemForm.reset()
   }
 
-  const generateItemFactory = (item: string) => {
+  const handleImageChange = async (file: File) => {
+    setIsGeneratingImage(true)
+    setApiResponse('')
+    const formData = new FormData()
+    formData.set('image', file, file.name)
+
     try {
-      let cleanItem = item.trim()
+      const result = await generateItem(formData)
 
-      if (cleanItem.startsWith('```json')) {
-        cleanItem = cleanItem.replace(JSON_START_REGEX, '')
-      }
-      if (cleanItem.startsWith('```')) {
-        cleanItem = cleanItem.replace(CODE_START_REGEX, '')
-      }
-      if (cleanItem.endsWith('```')) {
-        cleanItem = cleanItem.replace(CODE_END_REGEX, '')
-      }
-
-      const parsedItem = JSON.parse(cleanItem)
-
-      const itemsToProcess = Array.isArray(parsedItem)
-        ? parsedItem
-        : [parsedItem]
-
-      const validJsonItems = itemsToProcess.filter(
-        (itemValid) => itemValid.category && itemValid.value
-      )
-
-      if (validJsonItems.length > 0) {
-        setGeneratedItems(validJsonItems)
-        setIsGeneratedItemDialogOpen(true)
-        setApiResponse('')
-      } else {
-        setApiResponse(item)
-        setGeneratedItems([])
-      }
+      setGeneratedItems(result)
+      setApiResponse('')
     } catch {
-      setApiResponse(item)
-      setGeneratedItems([])
+      setApiResponse('Erro ao processar imagem')
+    } finally {
+      setIsGeneratingImage(false)
     }
-  }
-
-  const sendoItemsGenerated = () => {
-    if (generatedItems.length > 0) {
-      setIsSendingGeneratedItems(true)
-      Promise.all(
-        generatedItems.map(async (item) => {
-          const category = categories?.find(
-            (cat) => cat.name === item.category
-          )
-
-          await createItem({
-            name: item?.category,
-            description: item?.category,
-            categoryId: category?.id ?? '',
-            userId: user?.id ?? '',
-            price: Number(item?.value.replace(/[^\d,]/g, '').replace(',', '.')),
-          })
-        })
-      )
-        .then(() => {
-          setGeneratedItems([])
-          setIsGeneratedItemDialogOpen(false)
-        })
-        .finally(() => {
-          setIsSendingGeneratedItems(false)
-        })
-    }
-  }
-
-  const formatCategory = (category: string) => {
-    return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
-  }
-
-  const formatValue = (value: string) => {
-    const numericValue = value.replace(/[^\d,]/g, '').replace(',', '.')
-    const parsedValue = Number.parseFloat(numericValue)
-
-    if (Number.isNaN(parsedValue)) {
-      return value
-    }
-
-    return parsedValue.toFixed(2).replace('.', ',')
-  }
-
-  const calculateTotal = () => {
-    return generatedItems.reduce((total, item) => {
-      const numericValue = item.value.replace(/[^\d,]/g, '').replace(',', '.')
-      const parsedValue = Number.parseFloat(numericValue)
-      return total + (Number.isNaN(parsedValue) ? 0 : parsedValue)
-    }, 0)
-  }
-
-  const handleImageChange = (file: File) => {
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      const dataUrl = reader.result as string
-      const base64 = dataUrl.split(',')[1]
-
-      generateItem({ image: base64 })
-        .then((result) => {
-          generateItemFactory(result?.itemId)
-        })
-        .catch(() => {
-          setApiResponse('Erro ao processar imagem')
-        })
-        .finally(() => {
-          setIsGeneratingImage(false)
-        })
-    }
-
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -217,7 +107,7 @@ export function FormExpense() {
         >
           <FormField
             control={createItemForm.control}
-            name="name"
+            name="title"
             render={({ field }) => {
               return (
                 <FormItem>
@@ -252,7 +142,7 @@ export function FormExpense() {
 
           <FormField
             control={createItemForm.control}
-            name="categoryId"
+            name="category"
             render={({ field }) => {
               return (
                 <Select onValueChange={field.onChange} {...field}>
@@ -261,19 +151,13 @@ export function FormExpense() {
                     <SelectValue placeholder={'Selecione a categoria'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {isLoadingCategories ? (
-                      <div className="flex flex-col gap-2">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                      </div>
-                    ) : (
-                      categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                    {
+                      categories?.map((category, key) => (
+                        <SelectItem key={key} value={category}>
+                          {category}
                         </SelectItem>
                       ))
-                    )}
+                    }
                   </SelectContent>
                   <FormMessage />
                 </Select>
@@ -283,16 +167,16 @@ export function FormExpense() {
 
           <FormField
             control={createItemForm.control}
-            name="price"
+            name="value"
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>Preço</FormLabel>
+                  <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       className="remove-number-arrows"
-                      placeholder="Digite o preço do item..."
+                      placeholder="Digite o valor do item..."
                       type="number"
                     />
                   </FormControl>
@@ -315,14 +199,11 @@ export function FormExpense() {
                         accept="image/*"
                         id="image"
                         onChange={(e) => {
-                          setIsGeneratingImage(true)
-                          setApiResponse('')
                           const file = e.target.files?.[0]
                           if (file) {
                             handleImageChange(file)
                             return
                           }
-                          setIsGeneratingImage(false)
                         }}
                         type="file"
                       />
@@ -341,7 +222,7 @@ export function FormExpense() {
 
           {apiResponse && generatedItems.length === 0 && (
             <div className="rounded-lg border bg-muted/50 p-4">
-              <p className="break-all text-sm">{apiResponse}</p>
+              <p className="break-all text-sm text-red-400">{apiResponse}</p>
             </div>
           )}
 
@@ -352,85 +233,68 @@ export function FormExpense() {
             <Button type="submit">Criar item</Button>
           </DialogFooter>
         </form>
-      </Form>
+        {generatedItems.length > 0 && (
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {generatedItems.length === 1 ? 'Item Gerado' : 'Itens Gerados'}
+              </DialogTitle>
+              <DialogDescription>
+                Aqui estão os detalhes sobre{' '}
+                {generatedItems.length === 1 ? 'seu item' : 'seus itens'}:
+              </DialogDescription>
+            </DialogHeader>
 
-      <Dialog
-        onOpenChange={setIsGeneratedItemDialogOpen}
-        open={isGeneratedItemDialogOpen}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {generatedItems.length === 1 ? 'Item Gerado' : 'Itens Gerados'}
-            </DialogTitle>
-            <DialogDescription>
-              Aqui estão os detalhes sobre{' '}
-              {generatedItems.length === 1 ? 'seu item' : 'seus itens'}:
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <div className="rounded-lg border">
-              <table className="w-full">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                      Categoria
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      Valor
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {generatedItems.map((item) => (
-                    <tr className="border-t" key={item.category}>
-                      <td className="px-4 py-3">
-                        <span className="font-medium">
-                          {formatCategory(item.category)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="font-bold">
-                          R$ {formatValue(item.value)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                {generatedItems.length > 1 && (
-                  <tfoot className="border-t-2 ">
+            <div className="py-4">
+              <div className="rounded-lg border">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
                     <tr>
-                      <td className="px-4 py-3 font-extrabold">Total</td>
-                      <td className="px-4 py-3 text-right font-bold text-green-600">
-                        R$ {calculateTotal().toFixed(2).replace('.', ',')}
-                      </td>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                        Categoria
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                        Valor
+                      </th>
                     </tr>
-                  </tfoot>
-                )}
-              </table>
+                  </thead>
+                  <tbody>
+                    {generatedItems.map((item) => (
+                      <tr className="border-t" key={item._id.value}>
+                        <td className="px-4 py-3">
+                          <span className="font-medium">
+                            {item.props.title}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="font-bold">
+                            R$ {item.props.value}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  {generatedItems.length > 1 && (
+                    <tfoot className="border-t-2 ">
+                      <tr>
+                        <td className="px-4 py-3 font-extrabold">Total</td>
+                        <td className="px-4 py-3 text-right font-bold text-green-600">
+                          R$ {totalSpent.toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
             </div>
-          </div>
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Fechar</Button>
-            </DialogClose>
-            <Button
-              disabled={isSendingGeneratedItems}
-              onClick={sendoItemsGenerated}
-            >
-              {isSendingGeneratedItems ? (
-                <div className="mt-5 flex items-center justify-center">
-                  <Loader2 className="animate-spin" />
-                </div>
-              ) : (
-                'Usar Dados'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Fechar</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Form>
     </>
   )
 }

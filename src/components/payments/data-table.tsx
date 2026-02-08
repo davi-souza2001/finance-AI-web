@@ -69,15 +69,15 @@ export function DataTable<TData, TValue>({
           <Input
             className="max-w-sm"
             onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
+              table.getColumn('title')?.setFilterValue(event.target.value)
             }
             placeholder="Filter name..."
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
           />
         </div>
 
         <DialogContent>
-          <DialogContentExpense/>
+          <DialogContentExpense />
         </DialogContent>
         <div className="rounded-md border">
           <Table>

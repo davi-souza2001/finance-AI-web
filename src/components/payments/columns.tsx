@@ -12,11 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { CreateItemResponse } from '@/http/types/itemType'
+import type { ItemProps } from '@/http/types/itemType'
 import { useDeleteItem } from '@/http/use-delete-item'
-import { useUserStore } from '@/store/useUserStore'
 
-export const columns: ColumnDef<CreateItemResponse>[] = [
+export const columns: ColumnDef<ItemProps>[] = [
   {
     accessorKey: 'category',
     header: ({ column }) => {
@@ -37,7 +36,7 @@ export const columns: ColumnDef<CreateItemResponse>[] = [
     ),
   },
   {
-    accessorKey: 'name',
+    accessorKey: 'title',
     header: 'Name',
   },
   {
@@ -45,10 +44,10 @@ export const columns: ColumnDef<CreateItemResponse>[] = [
     header: 'Description',
   },
   {
-    accessorKey: 'price',
-    header: () => <div className="text-right">Price</div>,
+    accessorKey: 'value',
+    header: () => <div className="text-right">Value</div>,
     cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('price'))
+      const amount = Number.parseFloat(row.getValue('value'))
       const formatted = new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
@@ -61,11 +60,9 @@ export const columns: ColumnDef<CreateItemResponse>[] = [
     id: 'actions',
     header: () => <div className="text-right" />,
     cell: ({ row }) => {
-      const { user } = useUserStore()
       const { mutate: deleteItem } = useDeleteItem()
       const handleDeleteItem = () => {
         deleteItem({
-          userId: user?.id ?? '',
           itemId: row?.original?.id ?? '',
         })
       }

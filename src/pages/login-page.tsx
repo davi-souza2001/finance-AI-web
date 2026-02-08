@@ -48,13 +48,13 @@ export function LoginPage() {
   })
 
   async function handleLoginItem({ email, password }: LoginFormData) {
-    const { token } = await login({
+    const { access_token } = await login({
       email,
       password,
     })
 
-    if (token) {
-      Cookies.set('auth-finance-ai-web', token, {
+    if (access_token) {
+      Cookies.set('auth-finance-ai-web', access_token, {
         expires: 7, // 7 days
         path: '/',
       })

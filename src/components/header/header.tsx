@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { useUserStore } from '@/store/useUserStore'
 
 export const Header = () => {
   const navigate = useNavigate()
+  const { user } = useUserStore()
 
-   const logout = () => {
+  const logout = () => {
     Cookies.remove('auth-finance-ai-web')
     navigate('/login')
   }
@@ -25,7 +27,7 @@ export const Header = () => {
               <AvatarImage alt="@shadcn" src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <p>Davi Souza</p>
+            <p>{user?.name ?? user?.email}</p>
             <ArrowDownIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>

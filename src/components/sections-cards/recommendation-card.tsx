@@ -1,5 +1,5 @@
-import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 
+import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -9,48 +9,58 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import type { CreateItemResponse } from '@/http/types/itemType'
+import type { ItemProps } from '@/http/types/itemType'
 import type { User } from '@/http/types/userType'
 
 type RecommendationCardProps = {
-  items: CreateItemResponse[]
-  user: User | null
+  items: ItemProps[]
+  user: User
 }
 
 export function RecommendationCard({ items, user }: RecommendationCardProps) {
-  const totalSpent = items?.reduce((acc, item) => acc + item.price, 0) ?? 0
-  const totalIncome = typeof user?.id === 'number' ? user.id : 1000
+  const totalSpent = items?.reduce((acc, item) => acc + item.value, 0) ?? 0
+  const monthlySpending = user.monthlySpending
+  const expectationRepresentation = (totalSpent / monthlySpending) * 100
+  const mountAvailable = monthlySpending - totalSpent
 
-  const remainingMonth = totalIncome - totalSpent
-  const percentageToZero =
-    totalIncome > 0 ? (remainingMonth / totalIncome) * 100 : 0
+  const renderExpectationMonthly = () => {
+    switch (expectationRepresentation >= 50) {
+      case true: {
+        return (
+          <span className="flex items-center justify-center gap-1 text-red-200 text-xs">
+            {expectationRepresentation}%
+            <IconTrendingDown />
+          </span>
+        )
+      }
+
+      case false: {
+        return (
+          <span className='flex items-center justify-center gap-1 text-emerald-200 text-xs'>
+            {expectationRepresentation}%
+            <IconTrendingUp />
+          </span>
+        )
+      }
+    }
+  }
 
   return (
     <Card className="@container/card w-96">
       <CardHeader>
-        <CardDescription>Recommended Expenditure</CardDescription>
+        <CardDescription>Available</CardDescription>
         <CardTitle className="font-semibold @[250px]/card:text-3xl text-2xl tabular-nums">
-          R$ {remainingMonth.toFixed(2).replace('.', ',')}
+          R$ {mountAvailable.toFixed(2).replace('.', ',')}
         </CardTitle>
         <CardAction>
           <Badge variant="outline">
-            {percentageToZero !== 0 ? (
-              <span className='flex items-center justify-center gap-1 text-emerald-200 text-xs'>
-                {percentageToZero.toFixed(2)}%
-                <IconTrendingUp />
-              </span>
-            ) : (
-              <span className="flex items-center justify-center gap-1 text-red-200 text-xs">
-                {percentageToZero.toFixed(2)}%
-                <IconTrendingDown />
-              </span>
-            )}
+            {renderExpectationMonthly()}
           </Badge>
         </CardAction>
       </CardHeader>
       <CardFooter className="flex-col items-start gap-1.5 text-sm">
         <div className="line-clamp-1 flex gap-2 font-medium">
-          {remainingMonth > 0 ? (
+          {mountAvailable > 0 ? (
             <p className="flex gap-2">
               Trending up this month <IconTrendingUp className="size-4" />
             </p>

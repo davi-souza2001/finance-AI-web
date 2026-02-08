@@ -22,4 +22,3 @@ export function App() {
     </QueryClientProvider>
   )
 }
-// Authorization: Bearer {{token}}

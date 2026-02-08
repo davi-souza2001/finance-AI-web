@@ -9,7 +9,7 @@ export function useDeleteItem() {
     mutationFn: async (data: DeleteItemRequest) => {
       const token = Cookies.get('auth-finance-ai-web')
 
-      await fetch(`http://localhost:3333/items/${data.itemId}`, {
+      await fetch(`http://localhost:3333/transactions?transactionId=${data.itemId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

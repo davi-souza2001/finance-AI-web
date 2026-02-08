@@ -5,15 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import type { CreateItemResponse } from '@/http/types/itemType'
+import type { ItemProps } from '@/http/types/itemType'
 
 type TotalExpenseCardProps = {
-  items: CreateItemResponse[]
+  items: ItemProps[]
 }
 
 export function TotalExpenseCard({ items }: TotalExpenseCardProps) {
-
-  const totalSpent = items?.reduce((acc, item) => acc + item.price, 0) ?? 0
+  const totalSpent = items?.reduce((acc, item) => acc + item.value, 0) ?? 0
 
   return (
     <Card className="@container/card w-96">

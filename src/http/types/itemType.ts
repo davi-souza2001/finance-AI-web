@@ -1,31 +1,39 @@
-export type CreateItemRequest = {
-  name: string
-  description: string
-  categoryId: string
-  userId: string
-  price: number
+export enum TransactionCategories {
+  FOOD = 'FOOD',
+  TRANSPORT = 'TRANSPORT',
+  ENTERTAINMENT = 'ENTERTAINMENT',
+  HEALTH = 'HEALTH',
+  EDUCATION = 'EDUCATION',
+  HOUSING = 'HOUSING',
+  SALARY = 'SALARY',
+  OTHER = 'OTHER',
 }
 
-export type CreateItemResponse = {
-  name: string
-  description: string
-  categoryId: string
-  userId: string
-  price: number
+export type ItemProps = {
   id?: string
+  title: string
+  description?: string
+  value: number
+  category: TransactionCategories
   createdAt?: string
-  category?: string
+  updatedAt?: string
 }
 
-export type GenerateItemResponse = {
-  itemId: string
-}
-
-export type GenerateItemRequest = {
-  image: string
+export type ItemsPropsResponse = {
+  "_id": {
+    value: string
+  },
+  props: {
+    title: string,
+    description: string,
+    userId: string,
+    value: number,
+    category: TransactionCategories,
+    createdAt: string,
+    updatedAt: string
+  }
 }
 
 export type DeleteItemRequest = {
-  userId: string
   itemId: string
 }

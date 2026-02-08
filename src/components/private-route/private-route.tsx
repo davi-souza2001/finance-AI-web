@@ -1,18 +1,11 @@
 import Cookies from 'js-cookie'
-import { jwtDecode } from 'jwt-decode'
 import { Loader2 } from 'lucide-react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useGetUserById } from '@/http/user-get-user-by-id'
+import { useGetMe } from '@/http/user-me'
 import { useUserStore } from '@/store/useUserStore'
 
-interface JwtPayload {
-  sub: string
-}
-
 function AuthenticatedRoute() {
-  const token = Cookies.get('auth-finance-ai-web')
-  const { sub: userId } = jwtDecode<JwtPayload>(token ?? '')
-  const { data, isLoading } = useGetUserById(userId)
+  const { data, isLoading } = useGetMe()
 
   if (data) {
     useUserStore.setState({ user: data })
