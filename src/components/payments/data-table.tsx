@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -23,21 +22,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '../ui/dialog'
+import type { PaginationInfo } from '@/http/use-get-items'
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog'
 import { DialogContentExpense } from './components'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  pagination?: PaginationInfo
+  onPageChange?: (page: number) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pagination,
+  onPageChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -46,7 +46,8 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: pagination?.totalPages ?? -1,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -90,9 +91,9 @@ export function DataTable<TData, TValue>({
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </TableHead>
                     )
                   })}
@@ -131,16 +132,30 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <Button
-            disabled={!table.getCanPreviousPage()}
-            onClick={() => table.previousPage()}
+            disabled={!pagination?.hasPreviousPage}
+            onClick={() => {
+              if (pagination?.currentPage && pagination.currentPage > 1) {
+                onPageChange?.(pagination.currentPage - 1)
+              }
+            }}
             size="sm"
             variant="outline"
           >
             Previous
           </Button>
+          {pagination && (
+            <span className="text-muted-foreground text-sm">
+              Página {pagination.currentPage}
+              {pagination.totalPages && ` de ${pagination.totalPages}`}
+            </span>
+          )}
           <Button
-            disabled={!table.getCanNextPage()}
-            onClick={() => table.nextPage()}
+            disabled={!pagination?.hasNextPage}
+            onClick={() => {
+              if (pagination?.currentPage) {
+                onPageChange?.(pagination.currentPage + 1)
+              }
+            }}
             size="sm"
             variant="outline"
           >
